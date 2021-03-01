@@ -1,0 +1,278 @@
+{
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion": "1.0.0.1",
+   "parameters": {
+      "enableAcceleratedNetworking": {
+         "type": "bool",
+         "defaultValue": true
+      },
+      "networkSecurityGroupName": {
+         "type": "string",
+         "defaultValue": "[concat('console-', parameters('organisationName'), '-nsg')]"
+      },
+      "UserAssignedmanagedIdentityID": {
+         "type": "string",
+         "defaultValue": "64677194-61d9-4b0b-b159-f74e62a4f57e"
+
+      },
+      "networkSecurityGroupRules": {
+         "type": "array",
+         "defaultValue": [
+         ]
+      },
+      "organisationName": {
+         "type": "string"
+      },
+      "virtualNetworkName": {
+         "type": "string",
+         "defaultValue": "[concat(parameters('organisationName'), '-VNET')]"
+      },
+      "publicIpAddressName": {
+         "type": "string",
+         "defaultValue": "[concat('console-', parameters('organisationName'), '-ip')]"
+      },
+      "publicIpAddressType": {
+         "type": "string",
+         "defaultValue": "dynamic"
+      },
+      "publicIpAddressSku": {
+         "type": "string",
+         "defaultValue": "Basic"
+      },
+      "virtualMachineName": {
+         "type": "string",
+         "defaultValue": "[ concat(parameters('organisationName'), '-con') ]"
+      },
+      "virtualMachineComputerName": {
+         "type": "string",
+         "defaultValue": "[parameters('virtualMachineName')]"
+      },
+      "osDiskType": {
+         "type": "string",
+         "defaultValue": "Premium_LRS"
+      },
+      "virtualMachineSize": {
+         "type": "string",
+         "defaultValue": "Standard_D4s_v4"
+      },
+      "adminUsername": {
+         "type": "string",
+         "defaultValue": "cloudadmin"
+      },
+      "adminPassword": {
+         "type": "secureString"
+      },
+      "patchMode": {
+         "type": "string",
+         "defaultValue": "AutomaticByOS"
+      },
+      "sqlAuthenticationLogin": {
+         "type": "string",
+         "defaultValue": "sqllogin"
+      },
+      "sqlPassword": {
+         "type": "secureString"
+      },
+      "consoleClientUsername": {
+         "type": "string",
+         "defaultValue": "consoleclient"
+      },
+      "consoleClientPassword": {
+         "type": "securestring"
+      },
+      "timestamp": {
+         "type": "int",
+         "defaultValue": "[int(utcNow('MMddHHmmss'))]"
+      }
+   },
+   "variables": {
+      "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+      "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+      "subnetRef": "[concat(variables('vnetId'), '/subnets/default')]",
+      "networkInterfaceName": "[concat(parameters('virtualMachineName'), '-nic')]",
+      "location": "[resourceGroup().location]",
+      "UserAssignedIdentityName": "VenioManagedIdentity",
+      "dnslabel": "[tolower(concat('venio-', parameters('organisationName'), '-console'))]",
+      "parentDNSZone": "veniosystems.net",
+      "dnsZoneName": "[concat(parameters('organisationName'), '.', variables('parentDNSZone') )]",
+      "dnsRecordName": "console",
+      "sqlFQDN": "[concat('sql.', variables('dnsZoneName'))]",
+      "standardstorageAccountName": "[concat('prem', uniqueString(resourceGroup().id))]",
+      "standardstorageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('standardstorageAccountName'))]",
+      "premiumstorageAccountName": "[concat('prem', uniqueString(resourceGroup().id))]",
+      "premiumstorageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('premiumstorageAccountName'))]",
+      "standardsharename": "[concat('\\\\',variables('standardstorageAccountName'), '.file.core.windows.net\\', parameters('organisationName'), '-share')]",
+      "premiumsharename": "[concat('\\\\',variables('premiumstorageAccountName'), '.file.core.windows.net\\', parameters('organisationName'), '-share')]"
+
+   },
+   "resources": [
+      {
+         "type": "Microsoft.Network/dnszones/A",
+         "apiVersion": "2018-05-01",
+         "name": "[concat(variables('dnsZoneName'), '/', variables('dnsRecordName'))]",
+         "dependsOn": [
+            "[parameters('publicIpAddressName')]"
+         ],
+         "properties": {
+            "TTL": 3600,
+            "targetResource": {
+               "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpAddressName'))]"
+            }
+         }
+      },
+      {
+         "apiVersion": "2018-06-01",
+         "type": "Microsoft.Compute/virtualMachines/extensions",
+         "name": "[concat(parameters('virtualMachineName'), '/prep')]",
+         "location": "[variables('location')]",
+         "dependsOn": [
+            "[parameters('VirtualMachineName')]"
+         ],
+         "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.10",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+               "timestamp": "[parameters('timestamp')]"
+            },
+
+            "protectedSettings": {
+               "commandToExecute": "[concat('powershell.exe -file console.prep.ps1 c:\\venioconsole ', variables('sqlFQDN') , ' ', parameters('organisationName'), ' ', parameters('sqlAuthenticationLogin'),' ', parameters('sqlPassword'), ' -standarduncusername Azure\\', variables('standardstorageAccountName'), ' -standarduncpassword ', listKeys(variables('standardstorageAccountId'), '2019-04-01').keys[0].value, ' -standardunc ', variables('standardsharename'), ' -premiumuncusername Azure\\', variables('premiumstorageAccountName'), ' -premiumuncpassword ', listKeys(variables('premiumstorageAccountId'), '2019-04-01').keys[0].value, ' -premiumunc ', variables('premiumsharename'), ' -consoleClientPassword ', parameters('consoleClientPassword'), ' -consoleClientUsername ', parameters('consoleClientUsername'))]",
+               "fileUris": [
+                  "https://veniostorageaccount.blob.core.windows.net/software/VenioVirtualPrinter.zip",
+                  "https://veniostorageaccount.blob.core.windows.net/software/ReportBuilder3.msi",
+                  "https://veniostorageaccount.blob.core.windows.net/software/VenioUtility.zip",
+                  "https://veniostorageaccount.blob.core.windows.net/software/console.zip",
+                  "https://veniostorageaccount.blob.core.windows.net/software/console.prep.ps1",
+                  "https://veniostorageaccount.blob.core.windows.net/software/console.process.ps1"
+
+               ],
+               "managedIdentity": {
+                  "objectId": "[parameters('UserAssignedmanagedIdentityID')]"
+               }
+
+            }
+         }
+      },
+
+      {
+         "name": "[variables('networkInterfaceName')]",
+         "type": "Microsoft.Network/networkInterfaces",
+         "apiVersion": "2018-10-01",
+         "location": "[variables('location')]",
+         "dependsOn": [
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+            "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
+         ],
+         "properties": {
+            "ipConfigurations": [
+               {
+                  "name": "ipconfig1",
+                  "properties": {
+                     "subnet": {
+                        "id": "[variables('subnetRef')]"
+                     },
+                     "privateIPAllocationMethod": "Dynamic",
+                     "publicIpAddress": {
+                        "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                     }
+                  }
+               }
+            ],
+            "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]",
+            "networkSecurityGroup": {
+               "id": "[variables('nsgId')]"
+            }
+         }
+      },
+      {
+         "name": "[parameters('networkSecurityGroupName')]",
+         "type": "Microsoft.Network/networkSecurityGroups",
+         "apiVersion": "2019-02-01",
+         "location": "[variables('location')]",
+         "properties": {
+            "securityRules": "[parameters('networkSecurityGroupRules')]"
+         }
+      },
+      {
+         "name": "[parameters('publicIpAddressName')]",
+         "type": "Microsoft.Network/publicIpAddresses",
+         "apiVersion": "2019-02-01",
+         "location": "[variables('location')]",
+         "properties": {
+            "publicIpAllocationMethod": "[parameters('publicIpAddressType')]",
+            "dnsSettings": {
+               "domainNameLabel": "[variables('dnslabel')]"
+            }
+         },
+         "sku": {
+            "name": "[parameters('publicIpAddressSku')]"
+         }
+      },
+      {
+         "name": "[parameters('virtualMachineName')]",
+         "type": "Microsoft.Compute/virtualMachines",
+         "apiVersion": "2020-06-01",
+         "location": "[variables('location')]",
+         "dependsOn": [
+            "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+         ],
+         "identity": {
+            "type": "userAssigned",
+            "userAssignedIdentities": {
+               "[resourceID(subscription().subscriptionId, 'Utility-RG', 'Microsoft.ManagedIdentity/userAssignedIdentities/',variables('UserAssignedIdentityName'))]": {}
+            }
+         },
+         "properties": {
+            "hardwareProfile": {
+               "vmSize": "[parameters('virtualMachineSize')]"
+            },
+            "storageProfile": {
+               "osDisk": {
+                  "createOption": "fromImage",
+                  "managedDisk": {
+                     "storageAccountType": "[parameters('osDiskType')]"
+                  }
+               },
+               "imageReference": {
+                  "publisher": "MicrosoftWindowsServer",
+                  "offer": "WindowsServer",
+                  "sku": "2019-Datacenter",
+                  "version": "latest"
+               }
+            },
+            "networkProfile": {
+               "networkInterfaces": [
+                  {
+                     "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                  }
+               ]
+            },
+            "osProfile": {
+               "computerName": "[parameters('virtualMachineComputerName')]",
+               "adminUsername": "[parameters('adminUsername')]",
+               "adminPassword": "[parameters('adminPassword')]",
+               "windowsConfiguration": {
+                  "enableAutomaticUpdates": true,
+                  "provisionVmAgent": true,
+                  "patchSettings": {
+                     "patchMode": "[parameters('patchMode')]"
+                  }
+               }
+            },
+            "diagnosticsProfile": {
+               "bootDiagnostics": {
+                  "enabled": true
+               }
+            }
+         }
+      }
+   ],
+   "outputs": {
+      "fqdn": {
+         "type": "string",
+         "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpAddressName'))).dnsSettings.fqdn]"
+      }
+   }
+}
