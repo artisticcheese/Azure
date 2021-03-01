@@ -93,7 +93,7 @@
             "typeHandlerVersion": "1.10",
             "autoUpgradeMinorVersion": true,
             "settings": {
-               "timestamp": 11
+               "timestamp": 12
             },
 
             "protectedSettings": {
@@ -201,7 +201,7 @@
                "imageReference": {
                   "publisher": "MicrosoftWindowsServer",
                   "offer": "WindowsServer",
-                  "sku": "2019-Datacenter",
+                  "sku": "2019-Datacenter-Core",
                   "version": "latest"
                }
             },
