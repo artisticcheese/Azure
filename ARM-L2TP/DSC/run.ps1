@@ -72,13 +72,8 @@ Configuration Prep
       }
    }
 }
-
-localhost -OutputPath:"$env:temp\localhost"
-
-
-
-
-prep -OutputPath:"$env:temp\prep" -vpnAccount $vpnAccount -vpnPassword $vpnPassword -ConfigurationData $cd -SharedSecret $sharedSecret -ipAddressRange $ipAddressRange
+localhost -OutputPath "$env:temp\localhost"
+prep -OutputPath "$env:temp\prep" -vpnAccount $vpnAccount -vpnPassword $vpnPassword -ConfigurationData $cd -SharedSecret $sharedSecret -ipAddressRange $ipAddressRange
 Set-DSCLocalConfigurationManager -path "$env:temp\localhost" -Verbose -force
 Start-DscConfiguration -path "$env:temp\prep" -wait -Verbose -force
 

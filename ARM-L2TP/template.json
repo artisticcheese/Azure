@@ -8,7 +8,7 @@
       },
       "networkSecurityGroupName": {
          "type": "string",
-         "defaultValue": "[concat('console-', parameters('organisationName'), '-nsg')]"
+         "defaultValue": "[concat('RRAS-nsg')]"
       },
       "VNETResourceGroupName": {
          "type": "string",
@@ -76,7 +76,6 @@
    "variables": {
       "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
       "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', parameters('VNETName'))]",
-      "subnetRef": "[concat(variables('vnetId'), '/subnets/default')]",
       "networkInterfaceName": "[concat(parameters('virtualMachineName'), '-nic')]",
       "location": "[resourceGroup().location]"
    },
@@ -99,19 +98,12 @@
             },
 
             "protectedSettings": {
-               "commandToExecute": "[concat('powershell.exe -file prep.ps1 -VPNAccount ', parameters('adminUsername'), ' -VPNPassword (Convertto-SecureString ', parameters('adminPassword'),' -Force -AsplainText) -SharedSecret ', parameters('SharedSecret'), ' -ipAddressRange @(', parameters('VPNAddressRanges'), ')')]",
+               "commandToExecute": "[concat('powershell.exe -command \"& ./prep.ps1 -VPNAccount ', parameters('adminUsername'), ' -VPNPassword (convertto-SecureString ', parameters('adminPassword'),
+               ' -AsPlainText -Force) -SharedSecret ', parameters('SharedSecret'), ' -ipAddressRange @(', parameters('VPNAddressRanges'), ') \"')]",
                "fileUris": [
-                  "https://veniostorageaccount.blob.core.windows.net/software/VenioVirtualPrinter.zip",
-                  "https://veniostorageaccount.blob.core.windows.net/software/ReportBuilder3.msi",
-                  "https://veniostorageaccount.blob.core.windows.net/software/VenioUtility.zip",
-                  "https://veniostorageaccount.blob.core.windows.net/software/console.zip",
-                  "https://veniostorageaccount.blob.core.windows.net/software/console.prep.ps1",
-                  "https://veniostorageaccount.blob.core.windows.net/software/console.process.ps1"
-
-               ],
-               "managedIdentity": {
-                  "objectId": "[parameters('UserAssignedmanagedIdentityID')]"
-               }
+                  "https://raw.githubusercontent.com/artisticcheese/Azure/main/ARM-L2TP/DSC/prep.ps1",
+                  "https://raw.githubusercontent.com/artisticcheese/Azure/main/ARM-L2TP/DSC/run.ps1"
+               ]
 
             }
          }
@@ -132,7 +124,7 @@
                   "name": "ipconfig1",
                   "properties": {
                      "subnet": {
-                        "id": "[variables('subnetRef')]"
+                        "id": "[parameters('subnetRef')]"
                      },
                      "privateIPAllocationMethod": "Dynamic",
                      "publicIpAddress": {
@@ -155,7 +147,7 @@
          "properties": {
             "securityRules": [
                {
-                  "name": "RDP",
+                  "name": "L2TP",
                   "properties": {
                      "priority": 300,
                      "protocol": "UDP",
@@ -164,7 +156,10 @@
                      "sourceAddressPrefix": "*",
                      "sourcePortRange": "*",
                      "destinationAddressPrefix": "*",
-                     "destinationPortRange": "500,4500"
+                     "destinationPortRanges": [
+                        "500",
+                        "4500"
+                     ]
                   }
                }
             ]
@@ -178,7 +173,7 @@
          "properties": {
             "publicIpAllocationMethod": "[parameters('publicIpAddressType')]",
             "dnsSettings": {
-               "domainNameLabel": "[variables('dnslabel')]"
+               "domainNameLabel": "[take(uniqueString(resourceGroup().id),10)]"
             }
          },
          "sku": {
@@ -193,12 +188,6 @@
          "dependsOn": [
             "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
          ],
-         "identity": {
-            "type": "userAssigned",
-            "userAssignedIdentities": {
-               "[resourceID(subscription().subscriptionId, 'Utility-RG', 'Microsoft.ManagedIdentity/userAssignedIdentities/',variables('UserAssignedIdentityName'))]": {}
-            }
-         },
          "properties": {
             "hardwareProfile": {
                "vmSize": "[parameters('virtualMachineSize')]"
