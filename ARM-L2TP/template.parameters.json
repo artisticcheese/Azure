@@ -1,0 +1,27 @@
+{
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+   "contentVersion": "1.0.0.0",
+   "parameters": {
+      "VNETName": {
+         "value": "RRAS-VNET"
+      },
+      "VNETResourceGroupName": {
+         "value": "RRAS-RG"
+      },
+      "SubnetName": {
+         "value": "default"
+      },
+      "SharedSecret": {
+         "value": "gCxh0FgYw302"
+      },
+      "adminPassword": {
+         "value": "d1jwR8oALspH"
+      },
+      "virtualMachineSize": {
+         "value": "Standard_B1s"
+      },
+      "enableAcceleratedNetworking": {
+         "value": false
+      }
+   }
+}
