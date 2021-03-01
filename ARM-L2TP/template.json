@@ -29,8 +29,7 @@
       },
       "VPNAddressRanges": {
          "type": "string",
-         "defaultValue": "172.0.16.1,172.0.16.14"
-
+         "defaultValue": "'172.0.16.1','172.0.16.14'"
       },
 
       "publicIpAddressName": {
@@ -94,7 +93,7 @@
             "typeHandlerVersion": "1.10",
             "autoUpgradeMinorVersion": true,
             "settings": {
-               "timestamp": 10
+               "timestamp": 11
             },
 
             "protectedSettings": {

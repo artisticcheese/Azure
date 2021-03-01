@@ -54,7 +54,6 @@ Configuration Prep
             Install-RemoteAccess -IPAddressRange $using:ipAddressRange -VpnType Vpn
             Start-Sleep 10
             Set-VpnAuthProtocol -TunnelAuthProtocolsAdvertised PreSharedKey -SharedSecret $using:sharedSecret
-            Restart-Service RemoteAccess
             netsh ras set user $using:vpnAccount permit
          }
          GetScript  = { @{ Result = Get-RemoteAccess | out-string } }
