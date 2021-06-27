@@ -1,0 +1,4 @@
+# escape=`
+FROM fluent/fluentd:v1.13-windows-ltsc2019-1 
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+RUN "& gem install fluent-plugin-azure-loganalytics fluent-plugin-kubernetes_metadata_filter"
