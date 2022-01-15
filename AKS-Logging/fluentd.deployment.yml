@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: kube-logging
+  labels:
+    app: fluentd
+spec:
+  selector:
+    matchLabels:
+      app: fluentd
+  template:
+    metadata:
+      labels:
+        app: fluentd
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/os: windows
+      tolerations:
+        - key: "windows"
+          operator: "Equal"
+          value: "2019"
+          effect: "NoSchedule"
+      serviceAccountName: fluentbit
+      containers:
+        - name: fluentd
+          #workingDir: c:\fluent-bit\etc
+          volumeMounts:
+            - name: config-volume
+              mountPath: "c:\\fluent\\conf\\K8\\"
+            - name: varlog
+              mountPath: /var/log
+            - name: progdatacontainers
+              mountPath: /ProgramData/docker/containers
+          image: fluent/fluentd:v1.13-windows-ltsc2019-1
+          command: ["cmd"]
+          args:
+            [
+              "/c",
+              "gem install fluent-plugin-azure-loganalytics fluent-plugin-kubernetes_metadata_filter &",
+              "fluentd",
+              "-c",
+              "C:\\fluent\\conf\\K8\\fluentd.conf",
+            ]
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+      volumes:
+        - name: config-volume
+          configMap:
+            name: fluentd-configmap
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: progdatacontainers
+          hostPath:
+            path: /ProgramData/docker/containers
+---
+apiVersion: v1
+data:
+  fluentd.conf: |
+    <match fluent.**>
+      @type null
+    </match>
+    #Target Logs (ex:nginx)
+    <source>
+      @type tail
+      @id in_tail_container_logs_client1
+      path /var/log/containers/*client1*.log
+      pos_file /var/log/containers/fluentd-containers.client1.pos
+      tag kubernetes.client1.*
+      read_from_head false
+      format json
+      time_format %Y-%m-%dT%H:%M:%S.%N%Z
+    </source>
+    <source>
+      @type tail
+      @id in_tail_container_logs_client2
+      path /var/log/containers/*client2*.log
+      pos_file /var/log/containers/fluentd-containers.client2.pos
+      tag kubernetes.client2.*
+      read_from_head false
+      format json
+      time_format %Y-%m-%dT%H:%M:%S.%N%Z
+    </source>
+    <filter kubernetes.**>
+      @type kubernetes_metadata
+      @id filter_kube_metadata
+    </filter>
+    <filter kubernetes.**>
+      @type grep
+      <exclude>
+        key log
+        pattern /Reply/
+      </exclude>
+    </filter>
+    <match kubernetes.client1.**>
+      @type azure-loganalytics
+      customer_id d5ebf0b9-636b-41e9-b99a-d6f5f0f513f7
+      shared_key fFNmE60918QH7M9C9BRFlOd4KAlsmM8uXUYYhJbYNArbLa56kKA8EK4FvgKuROhG2TbKa96JMo5NOYA7CduOYQ==
+      log_type clientone
+    </match>
+    <match kubernetes.client2.**>
+      @type azure-loganalytics
+      customer_id d5ebf0b9-636b-41e9-b99a-d6f5f0f513f7
+      shared_key fFNmE60918QH7M9C9BRFlOd4KAlsmM8uXUYYhJbYNArbLa56kKA8EK4FvgKuROhG2TbKa96JMo5NOYA7CduOYQ==
+      log_type clienttwo
+    </match>
+kind: ConfigMap
+metadata:
+  name: fluentd-configmap
+  namespace: kube-logging

@@ -1,0 +1,232 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluentbit
+  namespace: kube-logging
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: fluent-bit-read
+rules:
+  - apiGroups: [""]
+    resources:
+      - namespaces
+      - pods
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: fluent-bit-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fluent-bit-read
+subjects:
+  - kind: ServiceAccount
+    name: fluentbit
+    namespace: kube-logging
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentbit
+  namespace: kube-logging
+  labels:
+    app: fluentbit
+  annotations:
+    fluentbit.io/exclude: "true"
+spec:
+  selector:
+    matchLabels:
+      app: fluentbit
+  template:
+    metadata:
+      labels:
+        app: fluentbit
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/os: windows
+      tolerations:
+        - key: "windows"
+          operator: "Equal"
+          value: "2019"
+          effect: "NoSchedule"
+      serviceAccountName: fluentbit
+      containers:
+        - name: fluentbit
+          workingDir: c:\fluent-bit\etc
+          volumeMounts:
+            - mountPath: C:\k
+              name: k
+            - mountPath: C:\var\log
+              name: varlog
+            - mountPath: C:\ProgramData
+              name: progdata
+            - mountPath: c:\fluent-bit\etc
+              name: fluent-bit-config
+          image: loggingcr.azurecr.io/fluentbit:1.6.10
+          command: ["fluent-bit"]
+          args:
+            - --config
+            - fluent-bit.conf
+      volumes:
+        - name: k
+          hostPath:
+            path: C:\k
+        - name: varlog
+          hostPath:
+            path: C:\var\log
+        - name: progdata
+          hostPath:
+            path: C:\ProgramData
+        - configMap:
+            defaultMode: 420
+            name: fluent-bit-win
+          name: fluent-bit-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logspewer
+  namespace: client1
+  labels:
+    app: logspewer
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: logspewer
+  template:
+    metadata:
+      labels:
+        app: logspewer
+    spec:
+      containers:
+        - name: logspewer
+          image: mcr.microsoft.com/powershell:nanoserver-1809
+          command: ["pwsh"]
+          args:
+            - -c
+            - while (1) {'{0} {1}' -f (Get-Date), $env:Computername; Start-sleep 10}
+      nodeSelector:
+        kubernetes.io/os: windows
+      tolerations:
+        - key: "windows"
+          operator: "Equal"
+          value: "2019"
+          effect: "NoSchedule"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logspewer
+  namespace: client2
+  labels:
+    app: logspewer
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: logspewer
+  template:
+    metadata:
+      labels:
+        app: logspewer
+    spec:
+      containers:
+        - name: logspewer
+          image: mcr.microsoft.com/powershell:nanoserver-1809
+          command: ["pwsh"]
+          args:
+            - -c
+            - while (1) {'{0} {1}' -f (Get-Date), $env:Computername; Start-sleep 10}
+      nodeSelector:
+        kubernetes.io/os: windows
+      tolerations:
+        - key: "windows"
+          operator: "Equal"
+          value: "2019"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-win
+  labels:
+    app: fluent-bit
+  namespace: kube-logging
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+      Parsers_File      parsers.conf
+      Log_File          c:\fluent-bit\log.txt
+      Log_Level         debug
+
+    [INPUT]
+      Name              tail
+      Tag               kube.client1.*
+      Path              C:\\var\\log\\containers\\*client1*.log
+      Parser            docker
+      DB                C:\\fluent-bit\\tail_docker.db
+      Skip_Long_Lines   Off
+      Mem_Buf_Limit     10MB
+      Refresh_Interval  10
+      
+    [INPUT]
+      Name              tail
+      Tag               kube.client2.*
+      Path              C:\\var\\log\\containers\\*client2*.log
+      Parser            docker
+      DB                C:\\fluent-bit\\tail_docker.db
+      Skip_Long_Lines   Off
+      Mem_Buf_Limit     10MB
+      Refresh_Interval  10
+
+    [INPUT]
+      Name              tail
+      Tag               kubelet.err
+      Path              C:\\k\\kubelet.err.log
+      DB                C:\\fluent-bit\\tail_kubelet.db
+
+    [FILTER]
+      Name              kubernetes
+      Match             kube.*
+      Kube_URL          https://kubernetes.default.svc.cluster.local:443
+
+    [OUTPUT]
+      name                  azure_blob
+      match                 kube.client1.*
+      account_name          fluentbitdump
+      shared_key            dUlKHzsrOj1gDtKpOSr+LfMvMHR/5JiRadIP3v0hZfVYpuoa2PguHBcLnomtes+HtfjpDEmfmEK7yin03s5g4A==
+      path                  client1
+      container_name        logs
+      auto_create_container on
+      tls                   off
+    [OUTPUT]
+      name                  azure_blob
+      match                 kube.client2.*
+      account_name          fluentbitdump
+      shared_key            dUlKHzsrOj1gDtKpOSr+LfMvMHR/5JiRadIP3v0hZfVYpuoa2PguHBcLnomtes+HtfjpDEmfmEK7yin03s5g4A==
+      path                  client2
+      container_name        logs
+      auto_create_container on
+      tls                   off
+    #[OUTPUT]
+      #Name  stdout
+      #Match *
+    #[OUTPUT]
+      #Name        azure
+      #Match       *
+      #Customer_ID d5ebf0b9-636b-41e9-b99a-d6f5f0f513f7
+      #Shared_Key  fFNmE60918QH7M9C9BRFlOd4KAlsmM8uXUYYhJbYNArbLa56kKA8EK4FvgKuROhG2TbKa96JMo5NOYA7CduOYQ==
+
+  parsers.conf: |
+    [PARSER]
+        Name         docker
+        Format       json
+        Time_Key     time
+        Time_Format  %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep    On
