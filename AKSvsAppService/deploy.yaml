@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aks-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aks
+  template:
+    metadata:
+      labels:
+        app: aks
+    spec:
+      containers:
+        - name: aks
+          image: artisticcheese/aks
+          command:
+            - "pwsh"
+          args:
+            - "-c"
+            - "while($true)"
+            - "{start-sleep 60}"
+      nodeSelector:
+        kubernetes.io/os: windows
+      tolerations:
+        - key: kubernetes.io/os
+          operator: Equal
+          value: windows
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: agentpool
+                    operator: In
+                    values:
+                      - mspool
