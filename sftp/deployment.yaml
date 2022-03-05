@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sftp-service
+  namespace: sftp
+  labels:
+    app: sftp
+spec:
+  type: LoadBalancer
+  selector:
+    app: sftp
+  ports:
+    - protocol: TCP
+      name: ssh
+      port: 22
+      targetPort: 22
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: sftp
+  name: "sftp"
+  labels:
+    app: "sftp"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sftp
+  template:
+    metadata:
+      labels:
+        app: sftp
+      namespace: sftp
+    spec:
+      containers:
+        - name: sftp
+          image: artisticcheese/sftp:lts-nanoserver-1809
+          imagePullPolicy: Always
+          env:
+            - name: ConfigLocation
+              value: "c:\\config"
+            - name: sftpLocation
+              value: "c:\\sftp"
+          ports:
+            - containerPort: 22
+          volumeMounts:
+            - name: ssh-host
+              mountPath: "c:\\config\\"
+              readOnly: true
+            - name: sftp
+              mountPath: "c:\\sftp\\"
+              readOnly: false
+      volumes:
+        - name: sftp
+          azureFile:
+            secretName: fileshare-secret
+            shareName: sftp
+            readOnly: false
+        - name: ssh-host
+          secret:
+            secretName: sftp-secret

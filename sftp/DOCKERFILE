@@ -3,13 +3,13 @@ ARG TAG=lts-nanoserver-1809
 FROM mcr.microsoft.com/powershell:$TAG
 SHELL ["pwsh", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 USER ContainerAdministrator
-WORKDIR prep
+WORKDIR c:\prep
 RUN Invoke-WebRequest "https://github.com/PowerShell/Win32-OpenSSH/releases/download/V8.6.0.0p1-Beta/OpenSSH-Win64.zip" -OutFile OpenSSH-Win64.zip -UseBasicParsing; `
    Expand-Archive OpenSSH-Win64.zip .; Remove-Item OpenSSH-Win64.zip`
    & .\OpenSSH-Win64\install-sshd.ps1; `
    Set-Service sshd -StartupType Manual; Set-Service ssh-agent -StartupType Manual; `
    sc.exe failure sshd reset= 86400 actions= restart/500 
-ENTRYPOINT if ($env:bootstrapLocation) {Invoke-Expression $env:bootstrapLocation } ;`
+ENTRYPOINT if ($env:bootstrapLocation) {Invoke-Expression (Invoke-WebRequest $env:bootstrapLocation).Content } ;`
    foreach ($user in (Get-Content $env:configLocation\users.json | convertfrom-JSON).users) { `
    net user /add $user.username $user.password ; `
    (Test-Path "$env:sftpLocation\$($user.username)") ? (Write-Output "Folder already exists"):(New-Item -ItemType Directory -path "$env:sftpLocation\$($user.username)"); `

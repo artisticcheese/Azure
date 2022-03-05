@@ -2,7 +2,7 @@ version: "3.9"
 services:
   sftp:
     build: .
-    image: artisticcheese/sftp:1
+    image: artisticcheese/sftp:lts-nanoserver-1809
     ports:
       - "22:22"
     # entrypoint:

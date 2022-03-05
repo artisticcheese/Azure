@@ -7,8 +7,9 @@ services:
       - "22:22"
     # entrypoint:
     #   - ping localhost -t
-    volumes:
     environment:
-      bootstrapLocation: ""
+      bootstrapLocation: "https://raw.githubusercontent.com/artisticcheese/Azure/fc1b95f4feff1a1a9f999a9c91ad276b0bd10e59/sftp/config/bootstrap.ps1"
+      ConfigLocation: "C:\\config\\"
+      sftpLocation: "C:\\sftp\\"
 networks:
   default: null
