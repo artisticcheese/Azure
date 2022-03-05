@@ -14,20 +14,24 @@ spec:
     spec:
       containers:
         - name: aks
-          image: artisticcheese/aks
-          command:
-            - "pwsh"
-          args:
-            - "-c"
-            - "while($true)"
-            - "{start-sleep 60}"
+          image: artisticcheese/aks-servercore
+          volumeMounts:
+            - name: logs
+              mountPath: "logs"
+            - name: logs
+              mountPath: "logs1"
+            - name: logs
+              mountPath: "logs2"
+            - name: logs
+              mountPath: "logs3"
+            - name: logs
+              mountPath: "logs4"
+            - name: logs
+              mountPath: "logs5"
+        - name: aks-clean
+          image: artisticcheese/aks-servercore
       nodeSelector:
         kubernetes.io/os: windows
-      tolerations:
-        - key: kubernetes.io/os
-          operator: Equal
-          value: windows
-          effect: NoSchedule
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -37,3 +41,14 @@ spec:
                     operator: In
                     values:
                       - mspool
+      tolerations:
+        - key: kubernetes.io/os
+          operator: Equal
+          value: windows
+          effect: NoSchedule
+      volumes:
+        - name: logs
+          azureFile:
+            secretName: fileshare-secret
+            shareName: logs
+            readOnly: false

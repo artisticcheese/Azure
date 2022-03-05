@@ -1,5 +1,10 @@
 #escape = ` 
-FROM mcr.microsoft.com/powershell:7.2.1-nanoserver-1809
-SHELL ["pwsh", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'Continue'; $verbosePreference='SilentlyContinue';"]
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'; $verbosePreference='SilentlyContinue';"]
+WORKDIR c:\workdir
+RUN invoke-webrequest https://github.com/PowerShell/PowerShell/releases/download/v7.2.1/PowerShell-7.2.1-win-x64.msi -outfile a.msi; `
+   Start-Process -filepath "a.msi" -ArgumentList "/quiet" -PassThru | Wait-Process; `
+   Remove-Item .\* -recurse -force -Verbose;
+SHELL ["pwsh", "-Command"]
 USER ContainerAdministrator
-RUN   find-module SQLServer | install-module -force -SkipPublisherCheck -scope AllUsers
+RUN  find-module SQLServer | install-module -force -SkipPublisherCheck -scope AllUsers

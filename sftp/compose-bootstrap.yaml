@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  sftp:
+    build: .
+    image: artisticcheese/sftp:1
+    ports:
+      - "22:22"
+    # entrypoint:
+    #   - ping localhost -t
+    volumes:
+    environment:
+      bootstrapLocation: ""
+networks:
+  default: null

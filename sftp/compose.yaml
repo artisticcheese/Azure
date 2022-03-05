@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  sftp:
+    build: .
+    image: artisticcheese/sftp:1
+    ports:
+      - "22:22"
+    # entrypoint:
+    #   - ping localhost -t
+    volumes:
+      - type: bind
+        source: C:\repo\Azure\sftp\config
+        target: c:\config\
+      - type: bind
+        source: c:\repo\Azure\sftp\data\
+        target: c:\sftp\
+    environment:
+      ConfigLocation: "C:\\config\\"
+      sftpLocation: "C:\\sftp\\"
+networks:
+  default: null
