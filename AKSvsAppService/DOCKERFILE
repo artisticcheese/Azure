@@ -3,8 +3,11 @@ FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'; $verbosePreference='SilentlyContinue';"]
 WORKDIR c:\workdir
 RUN invoke-webrequest https://github.com/PowerShell/PowerShell/releases/download/v7.2.1/PowerShell-7.2.1-win-x64.msi -outfile a.msi; `
+   #Invoke-Webrequest https://download.visualstudio.microsoft.com/download/pr/1ac0b57e-cf64-487f-aecf-d7df0111fd56/2484cbe1ffacceacaa41eab92a6de998/dotnet-runtime-6.0.3-win-x64.exe -outfile dotnetinstall.exe; `
+   #Start-Process -filepath "dotnet.exe" -ArgumentList "/install", "/quiet" -PassThru | Wait-Process;`
    Start-Process -filepath "a.msi" -ArgumentList "/quiet" -PassThru | Wait-Process; `
    Remove-Item .\* -recurse -force -Verbose;
 SHELL ["pwsh", "-Command"]
 USER ContainerAdministrator
 RUN  find-module SQLServer | install-module -force -SkipPublisherCheck -scope AllUsers
+COPY .\AzurePerformance\bin\Release\net6.0\win-x64\publish\ .

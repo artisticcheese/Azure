@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: aks
-          image: artisticcheese/aks-servercore
+          image: artisticcheese/aks-servercore:net
           volumeMounts:
             - name: logs
               mountPath: "logs"
@@ -29,7 +29,7 @@ spec:
             - name: logs
               mountPath: "logs5"
         - name: aks-clean
-          image: artisticcheese/aks-servercore
+          image: artisticcheese/aks-servercore:net
       nodeSelector:
         kubernetes.io/os: windows
       affinity:

@@ -1,0 +1,3 @@
+C:\repo\Azure\AKSvsAppService\AzurePerformance\bin\Release\net6.0\win-x64\publish\AzurePerformance.pdb
+C:\repo\Azure\AKSvsAppService\AzurePerformance\bin\Release\net6.0\win-x64\publish\sni.dll
+C:\repo\Azure\AKSvsAppService\AzurePerformance\bin\Release\net6.0\win-x64\publish\AzurePerformance.exe
