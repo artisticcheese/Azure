@@ -15,5 +15,5 @@ ENTRYPOINT if ($env:bootstrapLocation) {Invoke-Expression (Invoke-WebRequest $en
    (Test-Path "$env:sftpLocation\$($user.username)") ? (Write-Output "Folder already exists"):(New-Item -ItemType Directory -path "$env:sftpLocation\$($user.username)"); `
    };`
    mkdir c:\programdata\ssh\; Copy-Item -Path $env:configLocation\* -Destination c:\programdata\ssh\ ;  & .\OpenSSH-Win64\FixHostFilePermissions.ps1 -Confirm:$false; & .\OpenSSH-Win64\FixUserFilePermissions.ps1 -Confirm:$false; `
-   Start-Service sshd; (Test-path C:\ProgramData\ssh\logs\sshd.log)? (Write-Output 'Log Folder already exists'): (new-item "C:\ProgramData\ssh\logs\sshd.log")  `
+   Start-Service sshd; (Test-path C:\ProgramData\ssh\logs\sshd.log)? (Write-Output 'Log Folder already exists'): (new-item "C:\ProgramData\ssh\logs\sshd.log");`
    while ($true) {get-content C:\ProgramData\ssh\logs\sshd.log -tail 1 -wait} 
