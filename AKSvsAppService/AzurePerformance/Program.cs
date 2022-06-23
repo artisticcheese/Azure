@@ -2,12 +2,12 @@
 var client = new System.Net.Http.HttpClient();
 var tasks = new List<Task<int>>();
 var watch = System.Diagnostics.Stopwatch.StartNew();
-for (int i = 1; i < 101; i++)
+for (int i = 1; i < 50; i++)
 {
    async Task<int> func()
    {
 
-      string connString = "Server=someserver.database.usgovcloudapi.net;Database=Someserver;user id=core360user;password=somepassword;MultipleActiveResultSets=True;Pooling=false;";
+      string connString = "Server=reprodb.database.windows.net;Database=repro-db;user id=repro_user;password='RAepro_swoddrd123!@';MultipleActiveResultSets=True;Pooling=false;";
       SqlConnection connection = new SqlConnection(connString);
       SqlCommand command = new SqlCommand("Select @@VERSION", connection);
       command.Connection.Open();

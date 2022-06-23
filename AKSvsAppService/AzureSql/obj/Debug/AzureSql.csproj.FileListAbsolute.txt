@@ -1,0 +1,7 @@
+C:\Projects\POC\Azure\AzureSql\AzureSql\bin\Debug\AzureSql.exe.config
+C:\Projects\POC\Azure\AzureSql\AzureSql\bin\Debug\AzureSql.exe
+C:\Projects\POC\Azure\AzureSql\AzureSql\bin\Debug\AzureSql.pdb
+C:\Projects\POC\Azure\AzureSql\AzureSql\obj\Debug\AzureSql.csproj.SuggestedBindingRedirects.cache
+C:\Projects\POC\Azure\AzureSql\AzureSql\obj\Debug\AzureSql.csproj.CoreCompileInputs.cache
+C:\Projects\POC\Azure\AzureSql\AzureSql\obj\Debug\AzureSql.exe
+C:\Projects\POC\Azure\AzureSql\AzureSql\obj\Debug\AzureSql.pdb

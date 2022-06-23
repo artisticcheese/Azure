@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "FT2SXRUjmPFQ6jVazuI6oNhf3RtWrb8UjHTQZWZirKkexBtZJW/gpCbqwqxwqVSFrvnZq7r/xsdydVJdTOiqyw==",
+  "dgSpecHash": "3fCRiZmMNfti8nCbGb1TmpHekhswMKVE/0jGkA3KNvp6rWSGysFhHlhHj29Bj/GuKVK/Y7Gky7ASceTlE2Zc2w==",
   "success": true,
   "projectFilePath": "C:\\repo\\Azure\\AKSvsAppService\\AzurePerformance\\AzurePerformance.csproj",
   "expectedPackageFiles": [
@@ -14,10 +14,7 @@
     "C:\\Users\\artis\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.5.0\\system.runtime.compilerservices.unsafe.4.5.0.nupkg.sha512",
     "C:\\Users\\artis\\.nuget\\packages\\system.security.accesscontrol\\4.5.0\\system.security.accesscontrol.4.5.0.nupkg.sha512",
     "C:\\Users\\artis\\.nuget\\packages\\system.security.principal.windows\\4.5.0\\system.security.principal.windows.4.5.0.nupkg.sha512",
-    "C:\\Users\\artis\\.nuget\\packages\\system.text.encoding.codepages\\4.5.0\\system.text.encoding.codepages.4.5.0.nupkg.sha512",
-    "C:\\Users\\artis\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\6.0.3\\microsoft.netcore.app.runtime.win-x64.6.0.3.nupkg.sha512",
-    "C:\\Users\\artis\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\6.0.3\\microsoft.windowsdesktop.app.runtime.win-x64.6.0.3.nupkg.sha512",
-    "C:\\Users\\artis\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\6.0.3\\microsoft.aspnetcore.app.runtime.win-x64.6.0.3.nupkg.sha512"
+    "C:\\Users\\artis\\.nuget\\packages\\system.text.encoding.codepages\\4.5.0\\system.text.encoding.codepages.4.5.0.nupkg.sha512"
   ],
   "logs": []
 }

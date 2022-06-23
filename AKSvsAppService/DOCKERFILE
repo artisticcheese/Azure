@@ -10,4 +10,4 @@ RUN invoke-webrequest https://github.com/PowerShell/PowerShell/releases/download
 SHELL ["pwsh", "-Command"]
 USER ContainerAdministrator
 RUN  find-module SQLServer | install-module -force -SkipPublisherCheck -scope AllUsers
-COPY .\AzurePerformance\bin\Release\net6.0\win-x64\publish\ .
+COPY .\AzureSQL\bin\debug\ .
