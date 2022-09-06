@@ -1,0 +1,56 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "eastus"
+        },
+        "containerName": {
+            "value": "miner2"
+        },
+        "imageType": {
+            "value": "Public"
+        },
+        "imageName": {
+            "value": "artisticcheese/miner:11"
+        },
+        "osType": {
+            "value": "Linux"
+        },
+        "numberCpuCores": {
+            "value": "1"
+        },
+        "memory": {
+            "value": "1.5"
+        },
+        "restartPolicy": {
+            "value": "Never"
+        },
+        "gpuSku": {
+            "value": "P100"
+        },
+        "numberGpuCores": {
+            "value": "1"
+        },
+        "commandOverrideArray": {
+            "value": [
+                "sh",
+                "./ETH-2miners.sh"
+            ]
+        },
+        "ipAddressType": {
+            "value": "Public"
+        },
+        "ports": {
+            "value": [
+                {
+                    "port": "80",
+                    "protocol": "TCP"
+                }
+            ]
+        },
+        "dnsNameLabel": {
+            "value": "gregminermsdn2"
+        }
+    }
+}
