@@ -29,10 +29,18 @@ config file automatically.
 **Note:** there is no way to recover your password from the API key, so if you forget it, regenerate the key using a
 new password.
 
+# Creating a config file
+
+If you don't have a config file, you can extract it from a running T-Rex instance:  
+On the rig navigate to http://localhost:4067/, click the cog icon > raw config > get > copy the config from that page to a new file named `config.txt`.  
+You can backup your original batch file and then modify the original file.  
+Replace the line with `t-rex.exe` on it with this: `start t-rex.exe --config config.txt`  
+_Optional: Remove pause as well to have only one console open._
+
 # Config modification
 
 At the moment, changing miner configuration is only possible if you've started the miner using config file
-(`t-rex -c <config_file>`) as opposed to setting command line arguments in `*.bat`/`*.sh` scripts - see config file
+(`t-rex --config <config_file>`) as opposed to setting command line arguments in `*.bat`/`*.sh` scripts - see config file
 example in the miner archive, it's called `config_example`.  
 Applying the changes for most parameters exposed on Settings page requires miner restart. You will be prompted to do so
 after clicking "SAVE SETTINGS" button. "RESTART MINER" button is the top of the page and will be glowing red.

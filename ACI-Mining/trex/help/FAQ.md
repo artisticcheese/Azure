@@ -233,7 +233,7 @@ Note: On Linux Nvidia only exposes the core temps via the Nvidia driver. There i
 ## Why can't I see memory temperatures in T-Rex?
 You can only see things that the card exposes to the Nvidia driver, which is the fault of Nvidia, not T-Rex.
 
-T-Rex simply uses the native NVAPI functions.
+T-Rex simply uses the native NVAPI functions - these are only available on Windows.
 
 ## How do I create an API Key?
 `--api-generate-key` does not automatically append/edit the JSON at the current moment, in the meanwhile we have to do it manually.
@@ -389,15 +389,18 @@ This usually happens when Windows Firewall blocks network connections initiated 
 10. Click "OK"
 11. Reboot
 
+Another possible reason, if you're based in mainland China, is DNS tampering. In order to circumvent that, run
+the miner with `--no-sni --dns-https-server 1.1.1.1` parameters.
+
 ## Why does `--autoupdate` not work?
 It only works for T-Rex 0.23.0+. There was a breaking change in 0.23.0 so auto updates was disabled for any version older than that.
        
 **IMPORTANT!** If you are running a version older than 0.23.0, be sure to remove your overclock settings before updating! The cards may likely be numered/logged into a different order so your overclocks will end up on different cards than you intend. You can reapply them in the correct order after update has been completed.
 
 ## Why are some of my config.json settings not working?
-If you specify any commands in your batch file aside from `--config conf.json` you will not be able to change those you do specify beyond that.
+If you specify any commands in your batch file aside from `--config config.json` you will not be able to change those you do specify beyond that.
        
-ie: ```--config conf.json --api-key XXXX``` will allow you to change every value and save them to conf.json except for a new API key when you try to change the password via the WebUI. 
+ie: ```--config config.json --api-key XXXX``` will allow you to change every value and save them to config.json except for a new API key when you try to change the password via the WebUI. 
 
 ### Other options:
 **Windows command (CMD):**

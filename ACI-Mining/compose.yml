@@ -2,10 +2,10 @@ version: "3.9"
 services:
   miner:
     build: .
-    image: artisticcheese/miner:11
+    image: artisticcheese/miner:etc-2miners
     command:
       - sh
-      - ./ETH-2miners.sh
+      - ./ETC-2miners.sh
     ports:
       - 4067:4067
     deploy:

@@ -61,17 +61,17 @@ This section will be updated as more people provide their feedback on what setti
 ## Option 2: "standard" LHR unlock
 
 ### ETH
-T-Rex has partial LHR unlock functionality for 30xx GPUs mining `ethash` (~74% of full hashrate).  
+T-Rex has partial LHR unlock functionality for 30xx GPUs mining `ethash` (~78% of full hashrate).  
 
 * LHR mode is enabled by default for LHR cards, however, if you want to override LHR card auto-detection, you can do
 so by specifying `--lhr-tune` parameter which takes values from -1 to 100:  
-`-1` - auto-mode (LHR tune is set to 74 (or 68 in low power mode) for LHR cards and 0 for non-LHR)  
+`-1` - auto  
 ` 0` - disabled (use for non-LHR cards)  
-`68` - recommended starting value for most LHR cards in low power mode (see `--lhr-low-power`)  
-`74` - recommended starting value for most LHR cards  
-It can also be set for each GPU separately, e.g. `--lhr-tune 0,0,74.5,0` - this will tell the miner that the third GPU
-is LHR and that it needs to start with the tuning value of `74.5`, while the rest of the cards are non-LHR.  
-HiveOS equivalent would be `"lhr-tune": "0,0,74.5,0"`
+`74` - recommended starting value for most LHR cards in low power mode (see `--lhr-low-power`)  
+`78` - recommended starting value for most LHR cards  
+It can also be set for each GPU separately, e.g. `--lhr-tune 0,0,77.5,0` - this will tell the miner that the third GPU
+is LHR and that it needs to start with the tuning value of `77.5`, while the rest of the cards are non-LHR.  
+HiveOS equivalent would be `"lhr-tune": "0,0,77.5,0"`
 
 ### ERGO
 ERGO mining, as opposed to ETH, isn't targeted by LHR so its effect is not as pronounced.  
@@ -85,10 +85,11 @@ Commonly used LHR tune values:
 
 ## Tips
 
-* When miner tries to unlock LHR cards, by default it uses "LHR auto-tune" feature where it increases
-LHR tune automatically if the GPU is stable and doesn't hit LHR at the current tune value. It also decreases
-the tune value if it hits LHR too frequently. If you want to disable auto-tune and keep LHR tune value constant,
-run the miner with `--lhr-autotune-mode off`.
+* Previously, when T-Rex tried to unlock LHR cards, by default it used "LHR auto-tune" feature where it increased
+LHR tune automatically if the GPU was stable and didn't hit LHR at the current tune value. It also decreased
+the tune value if it hit LHR too frequently. Starting from version 0.25.15 LHR auto-tuner is working in "down" mode
+by default meaning it won't go up on its own, only down. To bring the old behaviour back use `--lhr-autotune-mode full`.
+If you want to disable auto-tune completely and keep LHR tune value constant, run the miner with `--lhr-autotune-mode off`.
 
 * It's important **not** to set intensity values manually as that may interfere with the unlocking algorithm.
 
