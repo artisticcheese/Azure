@@ -7,7 +7,7 @@ services:
       - sh
       - ./ETC-2miners.sh
     ports:
-      - 4067:4067
+      - 80:80
     deploy:
       resources:
         reservations:
