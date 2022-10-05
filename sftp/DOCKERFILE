@@ -8,6 +8,7 @@ RUN Invoke-WebRequest "https://github.com/PowerShell/Win32-OpenSSH/releases/down
    Expand-Archive OpenSSH-Win64.zip .; Remove-Item OpenSSH-Win64.zip`
    & .\OpenSSH-Win64\install-sshd.ps1; `
    Set-Service sshd -StartupType Manual; Set-Service ssh-agent -StartupType Manual; `
+   [Environment]::SetEnvironmentVariable('Path', 'C:\Program Files\PowerShell;C:\Windows\system32;C:\Windows;c:\prep\OpenSSH-Win64', 'Machine'); `
    sc.exe failure sshd reset= 86400 actions= restart/500 
 ENTRYPOINT if ($env:bootstrapLocation) {Invoke-Expression (Invoke-WebRequest $env:bootstrapLocation).Content } ;`
    foreach ($user in (Get-Content $env:configLocation\users.json | convertfrom-JSON).users) { `

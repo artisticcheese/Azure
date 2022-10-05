@@ -9,10 +9,10 @@ services:
     #   - ping localhost -t
     volumes:
       - type: bind
-        source: C:\repo\Azure\sftp\config
+        source: d:\docker\sandbox\
         target: c:\config\
       - type: bind
-        source: c:\repo\Azure\sftp\data\
+        source: d:\sandbox\
         target: c:\sftp\
     environment:
       ConfigLocation: "C:\\config\\"
