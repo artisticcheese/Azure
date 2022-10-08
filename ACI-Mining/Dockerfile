@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.4.2-base-ubuntu20.04
+FROM nvidia/cuda:11.7.1-runtime-ubuntu22.04
 COPY trex .
 RUN chmod -x ETH*
 RUN chmod -x ETC*

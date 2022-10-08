@@ -2,7 +2,7 @@ version: "3.9"
 services:
   miner:
     build: .
-    image: artisticcheese/miner:etc-2miners
+    image: artisticcheese/miner:11.7.1
     command:
       - sh
       - ./ETC-2miners.sh
