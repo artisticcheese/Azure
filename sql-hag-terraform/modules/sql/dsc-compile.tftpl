@@ -1,0 +1,61 @@
+Start-Transcript -path .\transcript.txt
+$scriptFile = ".\modules\sql\scripts\${configurationName}.ps1"
+Copy-Item -path "./modules/sql/scripts/${scriptVersion}.ps1" -Destination $scriptFile
+(Get-Content -path $scriptFile) -replace ("sqlconfig", "${configurationName}") | set-Content -path $scriptFile
+$VerbosePreference = 'Continue'
+$password = "${vmPassword}" | ConvertTo-SecureString -AsPlainText -Force
+$username = "${vmUsername}"
+$credential = [PSCredential]::New($username, $password) 
+$sqlData = @{
+   AllNodes    =
+   @(
+      @{
+         NodeName                    = "*"
+         PSDscAllowPlainTextPassword = $true
+      }
+      @{
+         NodeName = "${PrimaryNodeName}"
+         Role     = "Primary"
+      }  
+      @{
+         NodeName = "${SecondaryNodeName}"
+         Role     = "Secondary"
+      } 
+
+   );
+
+   NonNodeData =
+   @{
+      vmDnsZone                 = "${vmDnsZone}"
+      vm1Name                   = "${PrimaryNodeName}"
+      vm2Name                   = "${SecondaryNodeName}"
+      clusterName               = "${clusterName}"
+      clusterIP1                = "${clusterIP1}"
+      clusterSubNetMask1        = "${clusterSubNetMask1}"
+      clusterIP2                = "${clusterIP2}"
+      clusterSubNetMask2        = "${clusterSubNetMask2}"
+      listenerName              = "${listenerName}"
+      listenerIP1               = "${listenerIP1}"
+      listenerIP2               = "${listenerIP2}"
+      witnessStorageAccountName = "${witnessStorageAccountName}"
+      dbMasterKeyPassword       = "${dbMasterKeyPassword}"
+      dbLoginPassword           = "${dbLoginPassword}"
+      DataPath                  = "${DataPath}"
+      LogPath                   = "${LogPath}"
+      BackupPath                = "${BackupPath}"
+      TempDBPath                = "${TempDBPath}"
+      TempLOGPath               = "${TempLOGPath}"
+      witnessStorageKey         = "${witnessStorageKey}"
+      vmCredentials             = $credential
+   }
+}
+Write-Output ((Get-Location).Path)
+. $scriptFile
+${configurationName} -OutputPath . -ConfigurationData $sqlData -InformationAction Continue
+#Have to encode MOF files as UTF-8 as Windows powershell by default saves in UTF-16LE
+Get-ChildItem -Path ".\${configurationName}" -Recurse -File | ForEach-Object {
+   $content = Get-Content $_.FullName
+   $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $false
+   [System.IO.File]::WriteAllLines($_.FullName, $content, $utf8NoBomEncoding)
+} 
+Stop-Transcript

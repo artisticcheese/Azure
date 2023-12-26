@@ -1,0 +1,9 @@
+### Terraform ###
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+*.lock.hcl
+.terraform/
+secret.txt
+transcript.txt
+*_sqlconfig_*/
